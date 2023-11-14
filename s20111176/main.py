@@ -3,15 +3,19 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from tkinter import *
 import tkinter.ttk as ttk
 import threading
-from s20111176 import *
 from datetime import datetime
 import subprocess
 from samples_and_snippets import simple_mqtt_pub
+import tkinter.messagebox as msgbox
+import random
+import platform
 
 class main_frame():
 
     def __init__(self):
         self.current_parking = 0
+        self.os_name = platform.system()
+
 
         # Setup Tkinter
         self.root = Tk()
@@ -97,13 +101,13 @@ class main_frame():
         # Setup option
         self.setup_frame = LabelFrame(self.right_view_frame, text="SETUP")
         self.setup_frame.pack(side='top', pady=10, fill='both')
-        self.setup_frame_button_MQTT_BROKER = Button(self.setup_frame, text="🔴 MQTT BROKER OFF", command=self.mqtt_broker_on_off)
+        self.setup_frame_button_MQTT_BROKER = Button(self.setup_frame, height=2, text="🔴 MQTT BROKER OFF", command=self.mqtt_broker_on_off)
         self.setup_frame_button_MQTT_BROKER.pack(fill=BOTH, anchor=CENTER)
-        self.setup_frame_button_MQTT_SUB = Button(self.setup_frame, text="🔴 MQTT SUB OFF", command=self.mqtt_sub_on_off)
+        self.setup_frame_button_MQTT_SUB = Button(self.setup_frame, height=2, text="🔴 MQTT SUB OFF", command=self.mqtt_sub_on_off)
         self.setup_frame_button_MQTT_SUB.pack(fill=BOTH, anchor=CENTER)
 
         # Publisher
-        self.publisher_frame = LabelFrame(self.right_view_frame, text="PUBLISHER")
+        self.publisher_frame = LabelFrame(self.right_view_frame, text="SENSOR")
         self.publisher_frame.pack(side='top', pady=10, fill='both')
         self.publisher_frame_label_plate_number = Label(self.publisher_frame, text="PLATE NUMBER")
         self.publisher_frame_label_plate_number.pack()
@@ -115,43 +119,70 @@ class main_frame():
         self.publisher_frame_button_car_out.pack(fill=BOTH, anchor=CENTER)
 
 
-        # Test Mode
-        self.testmode_frame = LabelFrame(self.right_view_frame, text="TEST MODE")
-        self.testmode_frame.pack(side='top', pady=10, fill='both')
-        self.testmode_frame_button_on_off = Button(self.testmode_frame, text="🔴 OFF", command=self.testmode_on_off)
-        self.testmode_frame_button_on_off.pack(anchor=CENTER, fill=BOTH)
+        # # AUTO Mode
+        # self.auto_mode_frame = LabelFrame(self.right_view_frame, text="AUTO MODE")
+        # self.auto_mode_frame.pack(side='top', pady=10, fill='both')
+        # self.auto_mode_frame_button_on_off = Button(self.auto_mode_frame, text="🔴 OFF", command=self.auto_mode_on_off)
+        # self.auto_mode_frame_button_on_off.pack(anchor=CENTER, fill=BOTH)
 
         self.root.mainloop()
 
 
     def mqtt_broker_on_off(self):
         self.checkvalue = self.setup_frame_button_MQTT_BROKER.cget("text")
+    
+        
         if (self.checkvalue == "🟢 MQTT BROKER ON "):
             self.setup_frame_button_MQTT_BROKER.config(text="🔴 MQTT BROKER OFF")
-            subprocess.run(['osascript', '-e', 'tell application "Terminal" to close first window'])
+            if self.os_name == "Windows":
+                pass
+            elif self.os_name == "Darwin":
+                subprocess.run(['osascript', '-e', 'tell application "Terminal" to close first window'])
         else:
             self.setup_frame_button_MQTT_BROKER.config(text="🟢 MQTT BROKER ON ")
             self.current_directory = subprocess.check_output('pwd', shell=True, text=True).strip()
-            subprocess.run(['osascript', '-e', 'tell application "Terminal" to do script "/opt/homebrew/opt/mosquitto/sbin/mosquitto -c /opt/homebrew/etc/mosquitto/mosquitto.conf"'])
+            if self.os_name == "Windows":
+                pass
+            elif self.os_name == "Darwin":
+                subprocess.run(['osascript', '-e', 'tell application "Terminal" to do script "/opt/homebrew/opt/mosquitto/sbin/mosquitto -c /opt/homebrew/etc/mosquitto/mosquitto.conf"'])
 
     def mqtt_sub_on_off(self):
         self.checkvalue =  self.setup_frame_button_MQTT_SUB.cget("text")
         if (self.checkvalue == "🟢 MQTT SUB ON "):
             self.setup_frame_button_MQTT_SUB.config(text="🔴 MQTT SUB OFF")
-            subprocess.run(['osascript', '-e', 'tell application "Terminal" to close first window'])
+            if self.os_name == "Windows":
+                subprocess.run(['cmd', '/c', 'taskkill /F /IM cmd.exe'])
+            elif self.os_name == "Darwin":
+                subprocess.run(['osascript', '-e', 'tell application "Terminal" to close first window'])
         else:
             self.setup_frame_button_MQTT_SUB.config(text="🟢 MQTT SUB ON ")
             self.current_directory = subprocess.check_output('pwd', shell=True, text=True).strip()
-            subprocess.run(['osascript', '-e', f'tell application "Terminal" to do script "python3 {self.current_directory}/samples_and_snippets/simple_mqtt_sub.py"'])
+            if self.os_name == "Windows":
+                subprocess.run(['cmd', '/c', f'python {self.current_directory}\\samples_and_snippets\\simple_mqtt_sub.py'])
+            elif self.os_name == "Darwin":
+                subprocess.run(['osascript', '-e', f'tell application "Terminal" to do script "python3 {self.current_directory}/samples_and_snippets/simple_mqtt_sub.py"'])
 
 
     def incoming_car(self):
     # TODO: implement this method to publish the detection via MQTT
+        # check mqtt_broker and sub on
+        broker = self.setup_frame_button_MQTT_BROKER.cget('text')
+        subscriber = self.setup_frame_button_MQTT_SUB.cget('text')
+        server_check = broker + subscriber
+        if "OFF" in server_check:
+            msgbox.showinfo("Check Server", "Enable Broker and Subscriber")
+            return
+
+        if self.current_parking == 150:
+            msgbox.showinfo("FULL", "Car park is FULL\nWAIT UNTIL CAR GOES OUT")
+            return
+
         self.current_time = datetime.now().time()   
         self.formatted_time = self.current_time.strftime("%H:%M:%S")
         self.temp = f"{self.weather_sub_frame_label_temp_weather.cget('text')} {self.weather_sub_frame_label_temp_current.cget('text')} {self.weather_sub_frame_label_temp_celsius.cget('text')}"
         self.get_entry_info = self.publisher_frame_entry.get()
         if len(self.get_entry_info) == 0:
+            msgbox.showinfo("Check Plate number", "Enter Plate number")
             return
         if len(self.get_entry_info) >= 8:
             self.get_entry_info = self.get_entry_info[:8]
@@ -168,6 +199,7 @@ class main_frame():
         self.list_file.insert(END, self.incoming_msg)
         self.update_progressbar()
         self.update_label_current_number()
+        self.update_random_weather()
     
     def outgoing_car(self):
         # TODO: implement this method to publish the detection via MQTT
@@ -189,14 +221,16 @@ class main_frame():
             print(self.current_parking)
         self.update_progressbar()
         self.update_label_current_number()
+        self.update_random_weather()
         
 
-    def testmode_on_off(self):
-        self.checkvalue = self.testmode_frame_button_on_off.cget("text")
-        if (self.checkvalue == "🟢 ON "):
-            self.testmode_frame_button_on_off.config(text="🔴 OFF")
-        else:
-            self.testmode_frame_button_on_off.config(text="🟢 ON ")
+    # def auto_mode_on_off(self):
+    #     self.checkvalue = self.auto_mode_frame_button_on_off.cget("text")
+    #     if (self.checkvalue == "🟢 ON "):
+    #         self.auto_mode_frame_button_on_off.config(text="🔴 OFF")
+    #     else:
+    #         self.auto_mode_frame_button_on_off.config(text="🟢 ON ")
+            
 
         
     # update to app
@@ -208,6 +242,13 @@ class main_frame():
     def update_label_current_number(self):
         self.capacity_sub_frame_label_current.config(text=f"{self.current_parking:0>3}")
 
+    # update random weather
+    def update_random_weather(self):
+        self.emoji = ["☁️","☀️","🌤️","⛈️","🌦️","❄️"]
+        selected_emoji = self.emoji[random.randint(0, len(self.emoji)-1)]
+        self.weather_sub_frame_label_temp_current.config(text=f'{random.randint(1, 45):0>2}')
+        self.weather_sub_frame_label_temp_weather.config(text=f"{selected_emoji} ")
+        pass
 
 if __name__ == "__main__":
     main_frame()

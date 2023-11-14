@@ -1,8 +1,6 @@
-import sys
-import os
+import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
-import samples_and_snippets.no_pi as no_pi
 """The following code is used to provide an alternative to students who do not have a Raspberry Pi.
 If you have a Raspberry Pi, or a SenseHAT emulator under Debian, you do not need to use this code.
 
