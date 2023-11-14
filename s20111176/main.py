@@ -135,14 +135,14 @@ class main_frame():
         if (self.checkvalue == "🟢 MQTT BROKER ON "):
             self.setup_frame_button_MQTT_BROKER.config(text="🔴 MQTT BROKER OFF")
             if self.os_name == "Windows":
-                pass
+                subprocess.run(['cmd', '/c', 'exit'])
             elif self.os_name == "Darwin":
                 subprocess.run(['osascript', '-e', 'tell application "Terminal" to close first window'])
         else:
             self.setup_frame_button_MQTT_BROKER.config(text="🟢 MQTT BROKER ON ")
             self.current_directory = subprocess.check_output('pwd', shell=True, text=True).strip()
             if self.os_name == "Windows":
-                pass
+                subprocess.run(['cmd', '/c', 'start /min "" "cd %programdata%\\Laragon\\bin\\mosquito\\mosquitto –v"'])
             elif self.os_name == "Darwin":
                 subprocess.run(['osascript', '-e', 'tell application "Terminal" to do script "/opt/homebrew/opt/mosquitto/sbin/mosquitto -c /opt/homebrew/etc/mosquitto/mosquitto.conf"'])
 
