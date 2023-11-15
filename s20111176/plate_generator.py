@@ -19,5 +19,7 @@ class plate_generator():
         car_plate_number = ''.join(str(item) for item in self.generated_plate_number)
         return car_plate_number
         
+
+        
 if __name__ == "__main__":
     plate_generator().random_car_plate_number()
