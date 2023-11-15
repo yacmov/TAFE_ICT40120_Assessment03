@@ -8,22 +8,23 @@ from s20111176.mqtt import mqtt_pub
 class CarDetector:
     """Provides a couple of simple buttons that can be used to represent a sensor detecting a car. This is a skeleton only."""
 
-    def __init__(self, formatted_time, current_parking, incoming_msg):
+    def __init__(self, formatted_time, current_parking, incoming_msg, selection_get):
         self.formatted_time = formatted_time
         self.current_parking = current_parking
         self.incoming_msg = incoming_msg
-        pass
+        self.selection_get = selection_get
 
     def incoming_car(self):
         # TODO: implement this method to publish the detection via MQTT
-        mqtt_pub.mqtt_broker(f"car in  {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.incoming_msg}]")
+        mqtt_pub.mqtt_broker.mqtt_broker(f"car in  {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.incoming_msg}]")
         self.current_parking += 1
-        print(self.current_parking)
         return self.current_parking
 
     def outgoing_car(self):
         # TODO: implement this method to publish the detection via MQTT
-        print("Car goes out")
+        mqtt_pub.mqtt_broker.mqtt_broker(f"car out {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.selection_get}]")
+        self.current_parking -= 1
+        return self.current_parking
 
 
 if __name__ == '__main__':

@@ -23,8 +23,7 @@ class CarParkDisplay():
     fields = ['Available bays', 'Temperature', 'At']
 
     def __init__(self):
-        self.window = WindowedDisplay(
-            'Moondalup', CarParkDisplay.fields)
+        self.window = WindowedDisplay('Moondalup', CarParkDisplay.fields)
         updater = threading.Thread(target=self.check_updates)
         updater.daemon = True
         updater.start()

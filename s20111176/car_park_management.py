@@ -1,16 +1,14 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from datetime import datetime
-import time
 import random
 import platform
 from tkinter import *
 import tkinter.ttk as ttk
 import tkinter.messagebox as msgbox
-import threading
 import subprocess
-from s20111176.mqtt import mqtt_pub
 from s20111176.car_detector import CarDetector
+from s20111176.plate_generator import plate_generator
 
 class car_park():
 
@@ -19,6 +17,11 @@ class car_park():
         msgbox.showinfo("START", "This Program is made on Mac \nshould be some bugs in windows")
         self.current_parking = 0
         self.os_name = platform.system()
+        self.update_random_plate_id = None
+        self.update_car_in_id = None 
+        self.update_car_out_id = None
+        self.new_plate_number = None
+        self.used_plate_numbers = set()
         
         # Setup Tkinter
         self.root = Tk()
@@ -90,7 +93,7 @@ class car_park():
         self.list_frame.pack(side="top", fill="both")
         self.scrollbar = Scrollbar(self.list_frame)
         self.scrollbar.pack(side="right", fill="y")
-        self.list_file = Listbox(self.list_frame, selectmode="extended", height=15, width=50, yscrollcommand=self.scrollbar.set)
+        self.list_file = Listbox(self.list_frame, selectmode=SINGLE, height=23, width=50, yscrollcommand=self.scrollbar.set)
         self.list_file.pack(side="left", fill="both", expand=True)
         self.scrollbar.config(command=self.list_file.yview)
 
@@ -120,20 +123,71 @@ class car_park():
         self.publisher_frame_label_plate_number.pack()
         self.publisher_frame_entry = Entry(self.publisher_frame)
         self.publisher_frame_entry.pack()
-        self.publisher_frame_button_car_in = Button(self.publisher_frame, height=2, text="🚘 Incoming Car", cursor="right_side", command=self.incoming_car)
+        self.publisher_frame_button_car_in = Button(self.publisher_frame, state=DISABLED, height=2, text="🚘 Incoming Car", cursor="right_side", command=self.incoming_car)
         self.publisher_frame_button_car_in.pack(fill=BOTH, anchor=CENTER)
-        self.publisher_frame_button_car_out = Button(self.publisher_frame, height=2, text="Outgoing Car 🚘", cursor="bottom_left_corner", command=self.outgoing_car)
+        self.publisher_frame_button_car_out = Button(self.publisher_frame, state=DISABLED, height=2, text="Outgoing Car 🚘", cursor="bottom_left_corner", command=self.outgoing_car)
         self.publisher_frame_button_car_out.pack(fill=BOTH, anchor=CENTER)
+
+        # Auto Mode
+        self.auto_frame = LabelFrame(self.right_view_frame, text='AUTO MODE')
+        self.auto_frame.pack(side='top', pady=10, fill='both')
+        self.auto_frame_button_generate_car_plate_number = Button(self.auto_frame, state=DISABLED, text="🔴 AUTO PLATE NUMBER", command=self.auto_plate_number)
+        self.auto_frame_button_generate_car_plate_number.pack(fill=BOTH, anchor=CENTER)
+        self.auto_frame_button_car_in = Button(self.auto_frame, state=DISABLED, text="🔴 AUTO CAR IN ", command=self.auto_car_in)
+        self.auto_frame_button_car_in.pack(fill=BOTH, anchor=CENTER)
+        self.auto_frame_button_car_out = Button(self.auto_frame, state=DISABLED, text="🔴 AUTO CAR OUT", command=self.auto_car_out)
+        self.auto_frame_button_car_out.pack(fill=BOTH, anchor=CENTER)
+
+
+
+
 
 
         self.root.mainloop()
 
 
+    def auto_plate_number(self):
+        self.checkvalue = self.auto_frame_button_generate_car_plate_number.cget("text")
+    
+        if (self.checkvalue == "🟢 AUTO PLATE NUMBER"):
+            self.auto_frame_button_generate_car_plate_number.config(text="🔴 AUTO PLATE NUMBER")
+            self.update_stop_random_plate()
+        else:
+            self.auto_frame_button_generate_car_plate_number.config(text="🟢 AUTO PLATE NUMBER")
+            self.update_start_random_plate()
+
+    def auto_car_in(self):
+        self.checkvalue = self.auto_frame_button_car_in.cget("text")
+    
+        if (self.checkvalue == "🟢 AUTO CAR IN "):
+            self.auto_frame_button_car_in.config(text="🔴 AUTO CAR IN ")
+            self.update_stop_car_in()
+        else:
+            self.auto_frame_button_car_in.config(text="🟢 AUTO CAR IN ")
+            self.update_start_car_in()
+
+    def auto_car_out(self):
+        self.checkvalue = self.auto_frame_button_car_out.cget("text")
+    
+        if (self.checkvalue == "🟢 AUTO CAR OUT"):
+            self.auto_frame_button_car_out.config(text="🔴 AUTO CAR OUT")
+            self.update_stop_car_out()
+        else:
+            self.auto_frame_button_car_out.config(text="🟢 AUTO CAR OUT")
+            self.update_start_car_out()
+
+
+
     def mqtt_broker_on_off(self):
         self.checkvalue = self.setup_frame_button_MQTT_BROKER.cget("text")
     
-        
         if (self.checkvalue == "🟢 MQTT BROKER ON "):
+            self.auto_frame_button_generate_car_plate_number.config(state=DISABLED)
+            self.auto_frame_button_car_in.config(state=DISABLED)
+            self.auto_frame_button_car_out.config(state=DISABLED)
+            self.publisher_frame_button_car_in.config(state=DISABLED)
+            self.publisher_frame_button_car_out.config(state=DISABLED)
+
             self.setup_frame_button_MQTT_BROKER.config(text="🔴 MQTT BROKER OFF")
             if self.os_name == "Windows":
                 subprocess.run(['cmd', '/c', 'exit'])
@@ -141,6 +195,11 @@ class car_park():
                 subprocess.run(['osascript', '-e', 'tell application "Terminal" to close first window'])
         else:
             self.setup_frame_button_MQTT_BROKER.config(text="🟢 MQTT BROKER ON ")
+            self.auto_frame_button_generate_car_plate_number.config(state=ACTIVE)
+            self.auto_frame_button_car_in.config(state=ACTIVE)
+            self.auto_frame_button_car_out.config(state=ACTIVE)
+            self.publisher_frame_button_car_in.config(state=ACTIVE)
+            self.publisher_frame_button_car_out.config(state=ACTIVE)
             self.current_directory = subprocess.check_output('pwd', shell=True, text=True).strip()
             if self.os_name == "Windows":
                 subprocess.run(['cmd', '/c', 'start /min "" "cd %programdata%\\Laragon\\bin\\mosquito\\mosquitto –v"'])
@@ -189,13 +248,17 @@ class car_park():
             self.get_entry_info = self.get_entry_info[:8]
         if len(self.get_entry_info) <= 2:
             self.get_entry_info = self.get_entry_info + "　　　"
+
+        # Check if the plate number is already used
+        if self.get_entry_info in self.used_plate_numbers:
+            msgbox.showinfo("Duplicate Plate Number", "Plate number already used")
+            return
+
+        self.used_plate_numbers.add(self.get_entry_info)  # Add the new plate number to the set
         self.incoming_msg = f"  {self.get_entry_info:<10}  \t| {self.formatted_time}\t|  {self.temp}  "
 
         ## publish mqtt
-        # mqtt_pub.mqtt_broker(f"car in  {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.incoming_msg}]")
-        # self.current_parking += 1
-        # print(self.current_parking)
-        cd1 = CarDetector(self.formatted_time, self.current_parking, self.incoming_msg)
+        cd1 = CarDetector(self.formatted_time, self.current_parking, self.incoming_msg, "1")
         self.current_parking = cd1.incoming_car()
         
         # add to list
@@ -208,22 +271,34 @@ class car_park():
         # TODO: implement this method to publish the detection via MQTT
         
         # publish mqtt
+        if self.current_parking == 0:
+            return
+
+        # Random Selection
+        if self.update_car_out_id is not None:
+            self.list_file.select_set(random.randint(0, self.list_file.size() -1))
 
         self.out_car = self.list_file.curselection()
         if not self.out_car:
             return
-        mqtt_pub.mqtt_broker(f"car out {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.list_file.selection_get()}]")
+        
+        # remove selected item from the list
+        selected_item = self.list_file.selection_get()
+        selected_plate_number = selected_item.split("|")[0].strip()
+        if selected_plate_number in self.used_plate_numbers:
+            self.used_plate_numbers.remove(selected_plate_number)
+        
+        cd2 = CarDetector(self.formatted_time, self.current_parking, self.incoming_msg, selected_item)
+        self.current_parking = cd2.outgoing_car()
         
         if self.out_car == -1:
             return
         self.list_file.delete(self.out_car)
         if self.current_parking == 0:
             return
-        else:
-            self.current_parking -= 1
-            print(self.current_parking)
         self.update_progressbar()
         self.update_label_current_number()
+
             
 
 
@@ -256,6 +331,43 @@ class car_park():
         self.formatted_time = self.current_time.strftime("%H:%M:%S")
         self.time_frame_label.config(text=self.formatted_time)
         self.root.after(1000, self.update_current_time)
+
+    # auto number generator 
+    def update_start_random_plate(self):
+        self.new_plate_number = plate_generator().random_car_plate_number()
+        self.publisher_frame_entry.delete(0, END)
+        self.publisher_frame_entry.insert(0, self.new_plate_number)
+        self.update_random_plate_id = self.root.after(200, self.update_start_random_plate)
+
+    def update_stop_random_plate(self):
+        if self.update_random_plate_id is not None:
+            self.root.after_cancel(self.update_random_plate_id)
+            self.update_random_plate_id = None
+
+    # auto car in 
+    def update_start_car_in(self):
+        self.publisher_frame_button_car_in.config(state=DISABLED)
+        if self.current_parking < 150:
+            self.incoming_car()
+        self.update_car_in_id = self.root.after(200, self.update_start_car_in)
+
+    def update_stop_car_in(self):
+        if self.update_car_in_id is not None:
+            self.publisher_frame_button_car_in.config(state=ACTIVE)
+            self.root.after_cancel(self.update_car_in_id)
+            self.update_car_in_id = None
+        
+    # auto car out 
+    def update_start_car_out(self):
+        self.outgoing_car()
+        self.publisher_frame_button_car_out.config(state=DISABLED)
+        self.update_car_out_id = self.root.after(2000, self.update_start_car_out)
+
+    def update_stop_car_out(self):
+        if self.update_car_out_id is not None:
+            self.publisher_frame_button_car_out.config(state=ACTIVE)
+            self.root.after_cancel(self.update_car_out_id)
+            self.update_car_out_id = None
 
 if __name__ == "__main__":
     car_park()
