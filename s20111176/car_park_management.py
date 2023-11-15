@@ -1,27 +1,29 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from tkinter import *
-import tkinter.ttk as ttk
-import threading
 from datetime import datetime
-import subprocess
-from samples_and_snippets import simple_mqtt_pub
-import tkinter.messagebox as msgbox
+import time
 import random
 import platform
+from tkinter import *
+import tkinter.ttk as ttk
+import tkinter.messagebox as msgbox
+import threading
+import subprocess
+from s20111176.mqtt import mqtt_pub
+from s20111176.car_detector import CarDetector
 
-class main_frame():
+class car_park():
 
     def __init__(self):
+        # Global
+        msgbox.showinfo("START", "This Program is made on Mac \nshould be some bugs in windows")
         self.current_parking = 0
         self.os_name = platform.system()
-
-
+        
         # Setup Tkinter
         self.root = Tk()
         self.root.title("Smart car park")
         self.root.resizable(False, False)
-
 
         # Title Label
         self.title_frame = Frame(self.root)
@@ -74,17 +76,14 @@ class main_frame():
         self.weather_sub_frame_label_temp_current.pack(side="left")
         self.weather_sub_frame_label_temp_celsius = Label(self.weather_sub_frame, text="°C ", font=("Arial", 30))
         self.weather_sub_frame_label_temp_celsius.pack(side="left") 
+        self.update_random_weather() 
 
         # Progress Bar 
         self.p_var = DoubleVar()
         self.progressbar = ttk.Progressbar(self.left_view_frame, maximum=150, variable=self.p_var)
         self.progressbar.pack(side="top", fill='both')
-
-
         self.p_var.set(self.current_parking)
         self.progressbar.update()
-
-
 
         # ListBox
         self.list_frame = Frame(self.left_view_frame)
@@ -95,16 +94,24 @@ class main_frame():
         self.list_file.pack(side="left", fill="both", expand=True)
         self.scrollbar.config(command=self.list_file.yview)
 
-
+        # real time
+        self.current_time = datetime.now().time()   
+        self.formatted_time = self.current_time.strftime("%H:%M:%S")
+        self.time_frame = LabelFrame(self.right_view_frame, text="CURRENT TIME")
+        self.time_frame.pack(side='top', pady=10, fill = 'both')
+        self.time_frame_label = Label(self.time_frame, text=self.formatted_time, font=("Arial", 30))
+        self.time_frame_label.pack(fill='both', anchor=CENTER)
+        self.update_current_time() 
 
 
         # Setup option
         self.setup_frame = LabelFrame(self.right_view_frame, text="SETUP")
         self.setup_frame.pack(side='top', pady=10, fill='both')
-        self.setup_frame_button_MQTT_BROKER = Button(self.setup_frame, height=2, text="🔴 MQTT BROKER OFF", command=self.mqtt_broker_on_off)
+        self.setup_frame_button_MQTT_BROKER = Button(self.setup_frame, height=1, text="🔴 MQTT BROKER OFF", command=self.mqtt_broker_on_off)
         self.setup_frame_button_MQTT_BROKER.pack(fill=BOTH, anchor=CENTER)
-        self.setup_frame_button_MQTT_SUB = Button(self.setup_frame, height=2, text="🔴 MQTT SUB OFF", command=self.mqtt_sub_on_off)
+        self.setup_frame_button_MQTT_SUB = Button(self.setup_frame, height=1, text="🔴 MQTT SUB OFF", command=self.mqtt_sub_on_off)
         self.setup_frame_button_MQTT_SUB.pack(fill=BOTH, anchor=CENTER)
+
 
         # Publisher
         self.publisher_frame = LabelFrame(self.right_view_frame, text="SENSOR")
@@ -118,12 +125,6 @@ class main_frame():
         self.publisher_frame_button_car_out = Button(self.publisher_frame, height=2, text="Outgoing Car 🚘", cursor="bottom_left_corner", command=self.outgoing_car)
         self.publisher_frame_button_car_out.pack(fill=BOTH, anchor=CENTER)
 
-
-        # # AUTO Mode
-        # self.auto_mode_frame = LabelFrame(self.right_view_frame, text="AUTO MODE")
-        # self.auto_mode_frame.pack(side='top', pady=10, fill='both')
-        # self.auto_mode_frame_button_on_off = Button(self.auto_mode_frame, text="🔴 OFF", command=self.auto_mode_on_off)
-        # self.auto_mode_frame_button_on_off.pack(anchor=CENTER, fill=BOTH)
 
         self.root.mainloop()
 
@@ -158,9 +159,9 @@ class main_frame():
             self.setup_frame_button_MQTT_SUB.config(text="🟢 MQTT SUB ON ")
             self.current_directory = subprocess.check_output('pwd', shell=True, text=True).strip()
             if self.os_name == "Windows":
-                subprocess.run(['cmd', '/c', f'python {self.current_directory}\\samples_and_snippets\\simple_mqtt_sub.py'])
+                subprocess.run(['cmd', '/c', f'python {self.current_directory}\\s20111176\\mqtt_sub.py'])
             elif self.os_name == "Darwin":
-                subprocess.run(['osascript', '-e', f'tell application "Terminal" to do script "python3 {self.current_directory}/samples_and_snippets/simple_mqtt_sub.py"'])
+                subprocess.run(['osascript', '-e', f'tell application "Terminal" to do script "python3 {self.current_directory}/s20111176/mqtt/mqtt_sub.py"'])
 
 
     def incoming_car(self):
@@ -190,16 +191,18 @@ class main_frame():
             self.get_entry_info = self.get_entry_info + "　　　"
         self.incoming_msg = f"  {self.get_entry_info:<10}  \t| {self.formatted_time}\t|  {self.temp}  "
 
-        # publish mqtt
-        simple_mqtt_pub.mqtt_broker(f"car in  [{self.current_parking:0>3}/150] : [{self.incoming_msg}]")
-        self.current_parking += 1
-        print(self.current_parking)
+        ## publish mqtt
+        # mqtt_pub.mqtt_broker(f"car in  {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.incoming_msg}]")
+        # self.current_parking += 1
+        # print(self.current_parking)
+        cd1 = CarDetector(self.formatted_time, self.current_parking, self.incoming_msg)
+        self.current_parking = cd1.incoming_car()
         
         # add to list
         self.list_file.insert(END, self.incoming_msg)
         self.update_progressbar()
         self.update_label_current_number()
-        self.update_random_weather()
+        self.list_show_last_item()
     
     def outgoing_car(self):
         # TODO: implement this method to publish the detection via MQTT
@@ -209,7 +212,7 @@ class main_frame():
         self.out_car = self.list_file.curselection()
         if not self.out_car:
             return
-        simple_mqtt_pub.mqtt_broker(f"car out [{self.current_parking:0>3}/150] : [{self.list_file.selection_get()}]")
+        mqtt_pub.mqtt_broker(f"car out {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.list_file.selection_get()}]")
         
         if self.out_car == -1:
             return
@@ -221,24 +224,21 @@ class main_frame():
             print(self.current_parking)
         self.update_progressbar()
         self.update_label_current_number()
-        self.update_random_weather()
-        
-
-    # def auto_mode_on_off(self):
-    #     self.checkvalue = self.auto_mode_frame_button_on_off.cget("text")
-    #     if (self.checkvalue == "🟢 ON "):
-    #         self.auto_mode_frame_button_on_off.config(text="🔴 OFF")
-    #     else:
-    #         self.auto_mode_frame_button_on_off.config(text="🟢 ON ")
             
 
-        
+
+    # Scroll to the last item
+    def list_show_last_item(self):
+        self.list_file.yview_moveto(1.0)
+
+
+
     # update to app
     def update_progressbar(self):
         self.p_var.set(self.current_parking)
         self.progressbar.update()
 
-    # update current parking numbrer label
+    # update current parking number label
     def update_label_current_number(self):
         self.capacity_sub_frame_label_current.config(text=f"{self.current_parking:0>3}")
 
@@ -248,7 +248,14 @@ class main_frame():
         selected_emoji = self.emoji[random.randint(0, len(self.emoji)-1)]
         self.weather_sub_frame_label_temp_current.config(text=f'{random.randint(1, 45):0>2}')
         self.weather_sub_frame_label_temp_weather.config(text=f"{selected_emoji} ")
-        pass
+        self.root.after(3000, self.update_random_weather)
+
+    # update time
+    def update_current_time(self):
+        self.current_time = datetime.now().time()
+        self.formatted_time = self.current_time.strftime("%H:%M:%S")
+        self.time_frame_label.config(text=self.formatted_time)
+        self.root.after(1000, self.update_current_time)
 
 if __name__ == "__main__":
-    main_frame()
+    car_park()
