@@ -1,0 +1,69 @@
+alias:
+  - &app_font "Arial"
+  - &small_font 30
+  - &middle_font 40
+  - &big_font 50
+  - &max_bays 150
+  - &button_state_default "disabled"
+
+
+tafe:
+  studentID: 20111176
+
+
+
+info:
+  version: "1.0.0" # app version
+  website: "https://github.com/yacmov/TAFE_ICT40120_Assessment03/" # This project git address
+  title: "SMART CAR PARK"
+
+title_frame:
+  title_label: "❇ SMART CAR PARK ❇"
+  title_font: *app_font
+  title_font_size: *big_font
+
+status_frame:
+  message: "status comment"
+
+display_frame:
+  current_bays_icon: " 🅿️ : " 
+  max_byas: *max_bays
+  display_font: *app_font
+  display_font_size: *middle_font
+  display_max_bay: *max_bays
+
+weather:
+  temp: "☀️ "
+  current: "28"
+  celsius: "°C "
+  font: *app_font
+  font_size: *small_font
+  weather_list: ["☁️","☀️","🌤️","⛈️","🌦️","❄️"]
+
+
+list_box:
+  height: 23
+
+
+setup_option:
+  frame_text: "SETUP"
+  mqtt_broker_off: "🔴 MQTT BROKER OFF"
+  mqtt_broker_on: 🟢 MQTT BROKER ON 
+  mqtt_sub_off: "🔴 MQTT SUB OFF"
+  mqtt_sub_on:  "🟢 MQTT SUB ON "
+
+publisher_frame:
+  frame_text: "SENSOR"
+  button_state_default: *button_state_default
+  incoming_car: "🚘 Incoming Car"
+  outgoing_car: "Outgoing Car 🚘"
+
+auto_mode:
+  frame_text: 'AUTO MODE'
+  button_state_default: *button_state_default
+  off_plate_number: "🔴 AUTO PLATE NUMBER"
+  off_car_in: "🔴 AUTO CAR IN " 
+  off_car_out: "🔴 AUTO CAR OUT"
+  on_plate_number: "🟢 AUTO PLATE NUMBER"
+  on_car_in: "🟢 AUTO CAR IN "
+  on_car_out: "🟢 AUTO CAR OUT"
