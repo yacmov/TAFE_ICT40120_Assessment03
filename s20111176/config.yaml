@@ -1,3 +1,9 @@
+author:
+  institution: "TAFE WA North Metropolitan"
+  website: "https://www.northmetrotafe.wa.edu.au"
+  studentID: "20111176"
+  note: This app made for ICT40120_Assessment03 present car park using MQTT
+
 alias:
   - &app_font "Arial"
   - &small_font 30
@@ -7,14 +13,9 @@ alias:
   - &button_state_default "disabled"
 
 
-tafe:
-  studentID: 20111176
-
-
-
-info:
-  version: "1.0.0" # app version
-  website: "https://github.com/yacmov/TAFE_ICT40120_Assessment03/" # This project git address
+app_info:
+  version: "1.0.0"
+  git_repo: "https://github.com/yacmov/TAFE_ICT40120_Assessment03/"
   title: "SMART CAR PARK"
 
 title_frame:
@@ -38,7 +39,7 @@ weather:
   celsius: "°C "
   font: *app_font
   font_size: *small_font
-  weather_list: ["☁️","☀️","🌤️","⛈️","🌦️","❄️"]
+  weather_list: ["☀️", "🌤️", "⛅", "🌥️", "🌦️", "🌧️", "⛈️", "🌩️", "🌨️", "⛄", "🌪️", "🌊"]
 
 
 list_box:

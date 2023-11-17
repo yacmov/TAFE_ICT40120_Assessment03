@@ -31,7 +31,7 @@ class car_park():
         
         # Setup Tkinter
         self.root = Tk()
-        self.root.title(self.config['info']['title'])
+        self.root.title(self.config['app_info']['title'])
         self.root.resizable(False, False)
 
         # Title Label
