@@ -123,7 +123,7 @@ class CarParkDisplay():
                 f'{random.randint(0, 45):02d}℃',
                 time.strftime("%H:%M:%S")]))
             # Pretending to wait on updates from MQTT
-            time.sleep(random.randint(1, 10))
+            # time.sleep(random.randint(1, 10))
             # When you get an update, refresh the display.
             self.window.update(field_values)
 

@@ -10,10 +10,7 @@ import subprocess
 from s20111176.car_detector import CarDetector
 from s20111176.plate_generator import plate_generator
 import yaml
-
-
-
-
+from tkinter import ttk
 
 class car_park():
 
@@ -28,6 +25,7 @@ class car_park():
         self.update_car_out_id = None
         self.new_plate_number = None
         self.used_plate_numbers = set()
+        self.listbox_dict = dict()
         
         # Setup Tkinter
         self.root = Tk()
@@ -86,7 +84,7 @@ class car_park():
 
         # Progress Bar 
         self.p_var = DoubleVar()
-        self.progressbar = ttk.Progressbar(self.left_view_frame, maximum=150, variable=self.p_var)
+        self.progressbar = ttk.Progressbar(self.left_view_frame, maximum=self.config['display_frame']['display_max_bay'], variable=self.p_var)
         self.progressbar.pack(side="top", fill='both')
         self.p_var.set(self.current_parking)
         self.progressbar.update()
@@ -117,6 +115,9 @@ class car_park():
         self.setup_frame_button_MQTT_BROKER.pack(fill=BOTH, anchor=CENTER)
         self.setup_frame_button_MQTT_SUB = Button(self.setup_frame, height=1, text=self.config['setup_option']['mqtt_sub_off'], command=self.mqtt_sub_on_off)
         self.setup_frame_button_MQTT_SUB.pack(fill=BOTH, anchor=CENTER)
+        self.setup_frame_button_customer_ui = Button(self.setup_frame, height=1, text=self.config['setup_option']['customer_ui_off'], command=self.customer_ui_on_off)
+        self.setup_frame_button_customer_ui.pack(fill=BOTH, anchor=CENTER)
+
 
 
         # Publisher
@@ -223,7 +224,24 @@ class car_park():
             if self.os_name == "Windows":
                 subprocess.run(['cmd', '/c', f'python {self.current_directory}\\s20111176\\mqtt_sub.py'])
             elif self.os_name == "Darwin":
-                subprocess.run(['osascript', '-e', f'tell application "Terminal" to do script "python3 {self.current_directory}/s20111176/mqtt/mqtt_sub.py"'])
+                subprocess.run(['osascript', '-e', f'tell application "Terminal" to do script "cd {self.current_directory}; python3 s20111176/mqtt/mqtt_sub.py;"'])
+
+    def customer_ui_on_off(self):
+        self.checkvalue =  self.setup_frame_button_customer_ui.cget("text")
+        if (self.checkvalue == self.config['setup_option']['mqtt_sub_on']):
+            self.setup_frame_button_customer_ui.config(text=self.config['setup_option']['customer_ui_off'])
+            if self.os_name == "Windows":
+                subprocess.run(['cmd', '/c', 'taskkill /F /IM cmd.exe'])
+            elif self.os_name == "Darwin":
+                subprocess.run(['osascript', '-e', 'tell application "Terminal" to close first window'])
+        else:
+            self.setup_frame_button_customer_ui.config(text=self.config['setup_option']['customer_ui_on'])
+            self.current_directory = subprocess.check_output('pwd', shell=True, text=True).strip()
+            if self.os_name == "Windows":
+                subprocess.run(['cmd', '/c', f'python {self.current_directory}\\s20111176\\car_park_display.py'])
+            elif self.os_name == "Darwin":
+                subprocess.run(['osascript', '-e', f'tell application "Terminal" to do script "cd {self.current_directory}; python3 s20111176/car_park_display.py;"'])
+
 
 
     def incoming_car(self):
@@ -236,7 +254,7 @@ class car_park():
             msgbox.showinfo("Check Server", "Enable Broker and Subscriber")
             return
 
-        if self.current_parking == 150:
+        if self.current_parking == self.config['display_frame']['display_max_bay']:
             msgbox.showinfo("FULL", "Car park is FULL\nWAIT UNTIL CAR GOES OUT")
             return
 
@@ -255,22 +273,25 @@ class car_park():
 
         # Check if the plate number is already used
         if self.get_entry_info in self.used_plate_numbers:
-            msgbox.showinfo("Duplicate Plate Number", "Plate number already used")
+            # msgbox.showinfo("Duplicate Plate Number", "Plate number already used")
             return
 
         self.used_plate_numbers.add(self.get_entry_info)  # Add the new plate number to the set
-        self.incoming_msg = f"  {self.get_entry_info:<8}\t| {self.formatted_time}\t|  {self.temp}  "
+
+        self.listbox_dict.update({self.get_entry_info:{self.config['list_box']['weather']:self.temp, self.config['list_box']['car_in']:self.formatted_time, self.config['list_box']['car_out']:None}})
+        # self.incoming_msg = f"  {self.get_entry_info:<8}\t| {self.formatted_time}\t|  {self.temp}  "
+        self.incoming_msg = f"  {self.get_entry_info:<8}\t| {self.listbox_dict[self.get_entry_info]['car_in']}\t|  {self.listbox_dict[self.get_entry_info]['weather']}  "
 
         ## publish mqtt
         cd1 = CarDetector(self.formatted_time, self.current_parking, self.incoming_msg, "1")
         self.current_parking = cd1.incoming_car()
-        
-        # add to list
+    
+         # add to list
         self.list_file.insert(END, self.incoming_msg)
         self.update_progressbar()
         self.update_label_current_number()
         self.list_show_last_item()
-    
+        
     def outgoing_car(self):
         # TODO: implement this method to publish the detection via MQTT
         
@@ -288,31 +309,30 @@ class car_park():
         if not self.out_car:
             return
         
+        
         # remove selected item from the list
         selected_item = self.list_file.selection_get()
+        cd2 = CarDetector(self.formatted_time, self.current_parking, self.incoming_msg, selected_item)
+        self.current_parking = cd2.outgoing_car()
         selected_plate_number = selected_item.split("|")[0].strip()
         if selected_plate_number in self.used_plate_numbers:
             self.used_plate_numbers.remove(selected_plate_number)
         
-        cd2 = CarDetector(self.formatted_time, self.current_parking, self.incoming_msg, selected_item)
-        self.current_parking = cd2.outgoing_car()
         
         if self.out_car == -1:
             return
         self.list_file.delete(self.out_car)
-        if self.current_parking == 0:
+        if self.current_parking == 0 or self.current_parking == -1:
+            self.current_parking = 0
+            self.capacity_sub_frame_label_current.config(text="000")
             return
         self.update_progressbar()
         self.update_label_current_number()
 
-            
-
-
+        
     # Scroll to the last item
     def list_show_last_item(self):
         self.list_file.yview_moveto(1.0)
-
-
 
     # update to app
     def update_progressbar(self):
@@ -368,7 +388,7 @@ class car_park():
     def update_start_car_out(self):
         self.outgoing_car()
         self.publisher_frame_button_car_out.config(state=DISABLED)
-        self.update_car_out_id = self.root.after(2000, self.update_start_car_out)
+        self.update_car_out_id = self.root.after(500, self.update_start_car_out)
 
     def update_stop_car_out(self):
         if self.update_car_out_id is not None:
