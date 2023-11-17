@@ -17,8 +17,8 @@ class CarDetector():
 
     def incoming_car(self):
         # TODO: implement this method to publish the detection via MQTT
-        mqtt_pub.mqtt_broker.mqtt_broker(f"car in  {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.incoming_msg}]")
         self.current_parking += 1
+        mqtt_pub.mqtt_broker.mqtt_broker(f"car in  {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.incoming_msg}]")
         return self.current_parking
 
     def outgoing_car(self):
@@ -29,8 +29,8 @@ class CarDetector():
         current_time = current_time.strftime("%H:%M:%S")
         current_time = datetime.strptime(current_time, "%H:%M:%S")
         used_time = current_time - parked_time
-        mqtt_pub.mqtt_broker.mqtt_broker(f"car out {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.selection_get}| used: {used_time}]")
         self.current_parking -= 1
+        mqtt_pub.mqtt_broker.mqtt_broker(f"car out {self.formatted_time} [{self.current_parking:0>3}/150] : [{self.selection_get}| used: {used_time}]")
         return self.current_parking
 
 

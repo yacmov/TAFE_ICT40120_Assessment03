@@ -9,6 +9,7 @@ alias:
   - &small_font 30
   - &middle_font 40
   - &big_font 50
+  - &welcome_font 120
   - &max_bays 150
   - &button_state_default "disabled"
 
@@ -44,6 +45,11 @@ weather:
 
 list_box:
   height: 23
+  weather: "weather"
+  car_in: "car_in"
+  car_out: "car_out"
+
+  
 
 
 setup_option:
@@ -52,6 +58,9 @@ setup_option:
   mqtt_broker_on: 🟢 MQTT BROKER ON 
   mqtt_sub_off: "🔴 MQTT SUB OFF"
   mqtt_sub_on:  "🟢 MQTT SUB ON "
+  customer_ui_off: "🔴 CUSTOMER UI OFF"
+  customer_ui_on: "🟢 CUSTOMER UI ON "
+
 
 publisher_frame:
   frame_text: "SENSOR"
@@ -68,3 +77,11 @@ auto_mode:
   on_plate_number: "🟢 AUTO PLATE NUMBER"
   on_car_in: "🟢 AUTO CAR IN "
   on_car_out: "🟢 AUTO CAR OUT"
+
+car_park_display:
+  title: 'CUSTOMER DISPLAY'
+  welcome_msg: 'WELCOME'
+  welcome_font_size: *welcome_font
+  available_bay: "AVAILABLE BAY"
+  max_bay: *max_bays
+  at: "At"
