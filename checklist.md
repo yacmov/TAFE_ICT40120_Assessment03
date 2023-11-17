@@ -15,12 +15,12 @@
 |                          | Subscribes to MQTT topics                                                                                              | [X]      |
 |                          | Parses MQTT messages from car park                                                                                        | [X]      |
 | Configuration File       | **CarPark Class:**                                                                                                     |          |
-| Management               | Reads initial configuration from a file                                                                                | [ ]      |
-|                          | Writes available bays to a configuration class                                                                         | [ ]      |
+| Management               | Reads initial configuration from a file                                                                                | [X]      |
+|                          | Writes available bays to a configuration class                                                                         | [X]      |
 |                          | **Sensor Class:**                                                                                                      |          |
-|                          | Reads initial configuration from a file                                                                                | [ ]      |
+|                          | Reads initial configuration from a file                                                                                | [X]      |
 |                          | **Display Class:**                                                                                                     |          |
-|                          | Reads initial configuration from a file                                                                                | [ ]      |
+|                          | Reads initial configuration from a file                                                                                | [X]      |
 | Testing Requirements     | At least one test case for CarPark Class                                                                               | [ ]      |
 |                          | At least one test case for Sensor or Display Class                                                                     | [ ]      |
 | Additional Requirements  | Invent your own protocol for transmitting information; JSON is recommended                                             | [ ]      |

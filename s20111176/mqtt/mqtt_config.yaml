@@ -1,0 +1,5 @@
+mqtt:
+  host: "localhost"
+  port: 1883
+  publish: "lot/sensor"
+  subscribe: "lot/sensor"
