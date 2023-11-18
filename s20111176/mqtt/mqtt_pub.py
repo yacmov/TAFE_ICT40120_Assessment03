@@ -1,12 +1,9 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import paho.mqtt.client as paho
-import yaml
+from config_parser import load_config_yaml
 
-
-with open('s20111176/mqtt/mqtt_config.yaml', 'r') as file:
-    config: dict = yaml.safe_load(file)
-mqtt_config =  dict(config)
+mqtt_config = load_config_yaml('s20111176/mqtt/mqtt_config.yaml')
 
 class mqtt_broker():
     

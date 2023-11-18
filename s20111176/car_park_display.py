@@ -3,12 +3,12 @@ If you have a Raspberry Pi, or a SenseHAT emulator under Debian, you do not need
 
 You need to split the classes here into two files, one for the CarParkDisplay and one for the CarDetector.
 Attend to the TODOs in each class to complete the implementation."""
-import random
 import threading
 import time
 import tkinter as tk
 from typing import Iterable
 import paho.mqtt.subscribe as subscribe
+from s20111176.config_parser import load_config_yaml
 
 # ------------------------------------------------------------------------------------#
 # You don't need to understand how to implement this class, just how to use it.       #
@@ -35,7 +35,7 @@ class WindowedDisplay:
         """
         self.window = tk.Tk()
         self.window.title(f'{title}: Parking')
-        self.window.geometry('800x400')
+        self.window.geometry('600x250')
         self.window.resizable(False, False)
         self.display_fields = display_fields
 
@@ -77,6 +77,7 @@ class CarParkDisplay():
     def __init__(self):
         self.weather = ""
         self.available_bay = ""
+        self.config = load_config_yaml("s20111176/mqtt/mqtt_config.yaml")
         self.window = WindowedDisplay(
             'Moondalup', CarParkDisplay.fields)
         updater = threading.Thread(target=self.check_updates)
@@ -102,7 +103,7 @@ class CarParkDisplay():
 
 
     def mqtt(self):        
-        msg = subscribe.simple("lot/sensor", hostname="localhost", port=1883)
+        msg = subscribe.simple(self.config['mqtt']['publish'], hostname=self.config['mqtt']['host'], port=self.config['mqtt']['port'])
         detection = msg.payload.decode()
         split1 = detection.split('|')
         split2 = split1[0].split('[')

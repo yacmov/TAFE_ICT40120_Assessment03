@@ -9,15 +9,15 @@ import tkinter.messagebox as msgbox
 import subprocess
 from s20111176.car_detector import CarDetector
 from s20111176.plate_generator import plate_generator
-import yaml
 from tkinter import ttk
+from s20111176.config_parser import load_config_yaml
 
 class car_park():
 
     def __init__(self):
         # Global
         msgbox.showinfo("START", "This Program is made on Mac \nshould be some bugs in windows")
-        self.config = dict(self.load_config_yaml())
+        self.config = load_config_yaml("s20111176/config.yaml")
         self.current_parking = 0
         self.os_name = platform.system()
         self.update_random_plate_id = None
@@ -117,6 +117,8 @@ class car_park():
         self.setup_frame_button_MQTT_SUB.pack(fill=BOTH, anchor=CENTER)
         self.setup_frame_button_customer_ui = Button(self.setup_frame, height=1, text=self.config['setup_option']['customer_ui_off'], command=self.customer_ui_on_off)
         self.setup_frame_button_customer_ui.pack(fill=BOTH, anchor=CENTER)
+
+
 
 
 
@@ -228,7 +230,7 @@ class car_park():
 
     def customer_ui_on_off(self):
         self.checkvalue =  self.setup_frame_button_customer_ui.cget("text")
-        if (self.checkvalue == self.config['setup_option']['mqtt_sub_on']):
+        if (self.checkvalue == self.config['setup_option']['customer_ui_on']):
             self.setup_frame_button_customer_ui.config(text=self.config['setup_option']['customer_ui_off'])
             if self.os_name == "Windows":
                 subprocess.run(['cmd', '/c', 'taskkill /F /IM cmd.exe'])
@@ -388,19 +390,13 @@ class car_park():
     def update_start_car_out(self):
         self.outgoing_car()
         self.publisher_frame_button_car_out.config(state=DISABLED)
-        self.update_car_out_id = self.root.after(500, self.update_start_car_out)
+        self.update_car_out_id = self.root.after(200, self.update_start_car_out)
 
     def update_stop_car_out(self):
         if self.update_car_out_id is not None:
             self.publisher_frame_button_car_out.config(state=ACTIVE)
             self.root.after_cancel(self.update_car_out_id)
             self.update_car_out_id = None
-
-    # load yaml file
-    def load_config_yaml(self):
-        with open('s20111176/config.yaml', 'r') as file:
-            config: dict = yaml.safe_load(file)
-        return config
 
 if __name__ == "__main__":
     car_park()

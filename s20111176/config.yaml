@@ -29,7 +29,6 @@ status_frame:
 
 display_frame:
   current_bays_icon: " 🅿️ : " 
-  max_byas: *max_bays
   display_font: *app_font
   display_font_size: *middle_font
   display_max_bay: *max_bays
