@@ -8,7 +8,7 @@ import time
 import tkinter as tk
 from typing import Iterable
 import paho.mqtt.subscribe as subscribe
-from s20111176.config_parser import load_config_yaml
+from config_parser import load_config_yaml
 
 # ------------------------------------------------------------------------------------#
 # You don't need to understand how to implement this class, just how to use it.       #
