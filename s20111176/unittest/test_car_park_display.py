@@ -1,14 +1,18 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import unittest
-from config_parser import load_config_yaml
+import car_park_display
 
-class TestConfigParsing(unittest.TestCase):
-    # TODO: class test create 
-    def test_parse_config_has_correct_location_and_spaces(self):
-        config = load_config_yaml('s20111176/config.yaml')
-        self.assertEqual(config['location'], "Moondalup City Square Parking")
-        self.assertEqual(config['total_spaces'], 192)
+
+class Test_CarPark_Display(unittest.TestCase):
+    def test_car_park_display_fields_type_is_list(self):
+        test_text = []
+        test_display = car_park_display.CarParkDisplay.fields
+        
+        print(f"test_text's Type: {type(test_text)}")
+        print(f"test_display's Type: {type(test_display)}")
+
+        self.assertEqual(type(test_display), type(test_text))
 
 if __name__ == '__main__':
     unittest.main()

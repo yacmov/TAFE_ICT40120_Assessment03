@@ -1,20 +1,9 @@
-"""The following code is used to provide an alternative to students who do not have a Raspberry Pi.
-If you have a Raspberry Pi, or a SenseHAT emulator under Debian, you do not need to use this code.
-
-You need to split the classes here into two files, one for the CarParkDisplay and one for the CarDetector.
-Attend to the TODOs in each class to complete the implementation."""
 import threading
 import time
 import tkinter as tk
 from typing import Iterable
 import paho.mqtt.subscribe as subscribe
 from config_parser import load_config_yaml
-
-# ------------------------------------------------------------------------------------#
-# You don't need to understand how to implement this class, just how to use it.       #
-# ------------------------------------------------------------------------------------#
-# TODO: got to the main section of this script **first** and run the CarParkDisplay.  #
-
 
 class WindowedDisplay:
     """Displays values for a given set of fields as a simple GUI window. Use .show() to display the window; use .update() to update the values displayed.
@@ -77,7 +66,7 @@ class CarParkDisplay():
     def __init__(self):
         self.weather = ""
         self.available_bay = ""
-        self.config = load_config_yaml("s20111176/mqtt/mqtt_config.yaml")
+        self.config = load_config_yaml("s20111176/mqtt_config.yaml")
         self.window = WindowedDisplay(
             'Moondalup', CarParkDisplay.fields)
         updater = threading.Thread(target=self.check_updates)
@@ -93,7 +82,7 @@ class CarParkDisplay():
             self.available_bay = self.available_bay + " "
             # NOTE: Dictionary keys *must* be the same as the class fields
             field_values = dict(zip(CarParkDisplay.fields, [
-                f'{(150 - int(self.available_bay)):03d}',
+                f'{(self.available_bay)}',
                 f'{self.weather}',
                 time.strftime("%H:%M:%S")]))
             # Pretending to wait on updates from MQTT
@@ -105,20 +94,19 @@ class CarParkDisplay():
     def mqtt(self):        
         msg = subscribe.simple(self.config['mqtt']['publish'], hostname=self.config['mqtt']['host'], port=self.config['mqtt']['port'])
         detection = msg.payload.decode()
-        split1 = detection.split('|')
-        split2 = split1[0].split('[')
+        split = detection.split('|')
+        
 
 
         if "in " in detection:
             print("Incoming car detected!")
-            self.weather = split1[2][1:-1]
-            self.available_bay = split2[1][:3]
+            self.weather = split[7][1:]
+            self.available_bay = split[1].strip()
             # TODO: Handle incoming car detection, update display accordingly
         elif "out" in detection:
             print("Outgoing car detected!")
-            self.weather = split1[2][1:-1]
-            self.available_bay = split2[1][:3]
-
+            self.weather = split[7][1:]
+            self.available_bay = split[1].strip()
 
 
 if __name__ == '__main__':

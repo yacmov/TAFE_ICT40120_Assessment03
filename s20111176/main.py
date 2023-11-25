@@ -1,8 +1,4 @@
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from s20111176.car_park_management import car_park
-
-
+from car_park_management import car_park_management
 
 if __name__ == '__main__':
-    car_park()
+    my_car_park = car_park_management("s20111176/app_config.yaml")
