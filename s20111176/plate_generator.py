@@ -1,8 +1,5 @@
 import random
 import string
-
-
-
 class plate_generator():
     def __init__(self):
         self.all_alphabets = list(string.ascii_uppercase)

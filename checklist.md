@@ -22,18 +22,18 @@
 |                          | **Display Class:**                                                                                                     |          |
 |                          | Reads initial configuration from a file                                                                                | [X]      |
 | Testing Requirements     | At least one test case for CarPark Class                                                                               | [ ]      |
-|                          | At least one test case for Sensor or Display Class                                                                     | [ ]      |
-| Additional Requirements  | Invent your own protocol for transmitting information; JSON is recommended                                             | [ ]      |
+|                          | At least one test case for Sensor or Display Class                                                                     | [X]      |
+| Additional Requirements  | Invent your own protocol for transmitting information; JSON is recommended                                             | [X]      |
 | Git Requirements         | Forked the original project repository                                                                                 | [X]      |
 |                          | At least 3 local commits and 3 remote commits with reasonable messages                                                  | [X]      |
 |                          | Worked in a feature branch and merged the feature branch                                                               | [X]      |
 |                          | Both origin and local copy are synchronized at time of submission                                                      | [X]      |
 | Submission Guidelines    | Code files organized in coherent folder structure                                                                      | [X]      |
-|                          | Unit tests are submitted alongside the main code                                                                       | [ ]      |
-|                          | Configuration files used for testing are included in the submission                                                    | [ ]      |
+|                          | Unit tests are submitted alongside the main code                                                                       | [X]      |
+|                          | Configuration files used for testing are included in the submission                                                    | [X]      |
 |                          | Submitted a zip file containing your code (excluding `venv/`, but including `.git/`)                                   | [X]      |
 |                          | Ensure your lecturer has access to your GitHub repository                                                              | [X]      |
-|                          | Completed the project journal                                                                                          | [ ]      |
+|                          | Completed the project journal                                                                                          | [X]      |
 
 Please use this updated table as a comprehensive guide for the project requirements. Ensure each task is completed and checked off before submitting your project for assessment.
 Note there is a high-level (less detailed) checklist in the project journal, which is also used for grading. 
