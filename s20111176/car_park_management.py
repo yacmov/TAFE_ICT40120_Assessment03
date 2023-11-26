@@ -247,26 +247,26 @@ class car_park_management():
     def update_start_car_in(self):
         self.publisher_frame_button_car_in.config(state=DISABLED)
         self.incoming_car(self.weather_icon, self.weather_temp)
-        self.update_car_in_id = self.root.after(50, self.update_start_car_in)
+        self.update_car_in_id = self.root.after(1000, self.update_start_car_in)
 
     def update_stop_car_in(self):
-        if self.update_car_in_id != None:
-            self.publisher_frame_button_car_in.config(state=ACTIVE)
-            self.root.after_cancel(self.update_car_in_id)
-            self.update_car_in_id = None
+        # if self.update_car_in_id != None:
+        self.publisher_frame_button_car_in.config(state=ACTIVE)
+        self.root.after_cancel(self.update_car_in_id)
+        self.update_car_in_id = None
         
     # auto car out 
     def update_start_car_out(self):
         self.outgoing_car_random(self.weather_icon, self.weather_temp)
         self.publisher_frame_button_car_out.config(state=DISABLED)
-        self.update_car_out_id = self.root.after(50, self.update_start_car_out)
+        self.update_car_out_id = self.root.after(1000, self.update_start_car_out)
         
 
     def update_stop_car_out(self):
-        if self.update_car_out_id != None:
-            self.publisher_frame_button_car_out.config(state=ACTIVE)
-            self.root.after_cancel(self.update_car_out_id)
-            self.update_car_out_id = None
+        # if self.update_car_out_id != None:
+        self.publisher_frame_button_car_out.config(state=ACTIVE)
+        self.root.after_cancel(self.update_car_out_id)
+        self.update_car_out_id = None
 
 
     ## GUI LOAD
@@ -385,6 +385,34 @@ class car_park_management():
         self.auto_frame_button_car_in.pack(fill=BOTH, anchor=CENTER)
         self.auto_frame_button_car_out = Button(self.auto_frame, state=self.config['auto_mode']['button_state_default'], text=self.config['auto_mode']['off_car_out'], command=self.auto_car_out)
         self.auto_frame_button_car_out.pack(fill=BOTH, anchor=CENTER)
+
+
+
+        ## Test Mode
+        self.test_frame = LabelFrame(self.right_view_frame, text="Cheat Mode")
+        self.test_frame.pack(side='top', pady=10, fill='both')
+        self.test_frame_button_car_in = Button(self.test_frame, text="Add 50 car objects", command=self.add_car_objects_test)
+        self.test_frame_button_car_in.pack(fill=BOTH, anchor=CENTER)
+        self.test_frame_button_car_out = Button(self.test_frame, text="Remove all car objects", command=self.remove_car_objects_test)
+        self.test_frame_button_car_out.pack(fill=BOTH, anchor=CENTER)
+
+    def add_car_objects_test(self):
+        for i in range(50):
+            new_car = self.cp.car_in(plate_generator().random_car_plate_number(), self.weather_icon, self.weather_temp)
+            if new_car == None: return
+            self.update_list_view()
+            self.update(self.cp)
+
+
+    def remove_car_objects_test(self):
+        if len(self.cp.all_cars) == 0: return
+        for i in range(len(self.cp.all_cars)):
+            selected_car = self.cp.car_out(self.cp.all_cars[0].plate_number, self.weather_icon, self.weather_temp)
+            if selected_car == None: return
+            self.update_list_view()
+            self.update(self.cp)
+
+        
 
     def config_setup(self):
         self.config = load_config_yaml(self.config_yaml)

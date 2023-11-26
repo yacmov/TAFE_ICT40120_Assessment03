@@ -43,7 +43,7 @@ weather:
 
 
 list_box:
-  height: 23
+  height: 30
   weather: "weather"
   car_in: "car_in"
   car_out: "car_out"
