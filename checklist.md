@@ -21,7 +21,7 @@
 |                          | Reads initial configuration from a file                                                                                | [X]      |
 |                          | **Display Class:**                                                                                                     |          |
 |                          | Reads initial configuration from a file                                                                                | [X]      |
-| Testing Requirements     | At least one test case for CarPark Class                                                                               | [ ]      |
+| Testing Requirements     | At least one test case for CarPark Class                                                                               | [X]      |
 |                          | At least one test case for Sensor or Display Class                                                                     | [X]      |
 | Additional Requirements  | Invent your own protocol for transmitting information; JSON is recommended                                             | [X]      |
 | Git Requirements         | Forked the original project repository                                                                                 | [X]      |

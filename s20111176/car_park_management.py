@@ -17,6 +17,8 @@ class car_park_management():
 
     def __init__(self, config_yaml):
         ## Setup config
+
+        msgbox.showinfo("Info", "This program made by Mac, \n if test on windows need to run\n*Broker, \n*car_park_display.py")
         self.update_random_plate_id = None
         self.update_car_in_id = None 
         self.update_car_out_id = None
