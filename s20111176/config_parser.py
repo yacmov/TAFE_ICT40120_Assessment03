@@ -3,7 +3,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import yaml
 
 def load_config_yaml(path):
-    with open(path, 'r') as file:
+    with open(path, 'r', encoding='utf-8') as file:
         config: dict = yaml.safe_load(file)
     return dict(config)
 

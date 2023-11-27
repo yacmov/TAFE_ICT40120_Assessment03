@@ -104,9 +104,9 @@ class car_park():
         date = str(date)[:-16]
         file_path = f's20111176/log/{date}.txt'
         if not os.path.exists(file_path):
-            with open(file_path, 'w') as file:
+            with open(file_path, 'w', encoding='utf-8') as file:
                 file.write()
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             log_load = file.readlines()
         
         for line in log_load:
