@@ -17,6 +17,8 @@ class car_park_management():
 
     def __init__(self, config_yaml):
         ## Setup config
+
+        msgbox.showinfo("Info", "This program made by Mac, \n if test on windows need to run\n*Broker, \n*car_park_display.py")
         self.update_random_plate_id = None
         self.update_car_in_id = None 
         self.update_car_out_id = None
@@ -159,7 +161,8 @@ class car_park_management():
             self.publisher_frame_button_car_out.config(state=ACTIVE)
             self.current_directory = subprocess.check_output('pwd', shell=True, text=True).strip()
             if self.os_name == "Windows":
-                subprocess.run(['cmd', '/c', 'start /min "" "cd %programdata%\\Laragon\\bin\\mosquito\\mosquitto –v"'])
+                msgbox.showinfo("Info", "This program made by Mac, \n if test on windows need to run\n*Broker, \n*car_park_display.py")
+                # subprocess.run(['cmd', '/c', 'start /min "" "cd %programdata%\\Laragon\\bin\\mosquito\\mosquitto –v"'])
             elif self.os_name == "Darwin":
                 subprocess.run(['osascript', '-e', 'tell application "Terminal" to do script "/opt/homebrew/opt/mosquitto/sbin/mosquitto -c /opt/homebrew/etc/mosquitto/mosquitto.conf"'])
 
@@ -175,7 +178,8 @@ class car_park_management():
             self.setup_frame_button_MQTT_SUB.config(text=self.config['setup_option']['mqtt_sub_on'])
             self.current_directory = subprocess.check_output('pwd', shell=True, text=True).strip()
             if self.os_name == "Windows":
-                subprocess.run(['cmd', '/c', f'python {self.current_directory}\\s20111176\\mqtt_sub.py'])
+                msgbox.showinfo("Info", "This program made by Mac, \n if test on windows need to run\n*Broker, \n*car_park_display.py")
+                # subprocess.run(['cmd', '/c', f'python {self.current_directory}\\s20111176\\mqtt_sub.py'])
             elif self.os_name == "Darwin":
                 subprocess.run(['osascript', '-e', f'tell application "Terminal" to do script "cd {self.current_directory}; python3 s20111176/mqtt_sub.py;"'])
 
@@ -191,6 +195,7 @@ class car_park_management():
             self.setup_frame_button_customer_ui.config(text=self.config['setup_option']['customer_ui_on'])
             self.current_directory = subprocess.check_output('pwd', shell=True, text=True).strip()
             if self.os_name == "Windows":
+                msgbox.showinfo("Info", "This program made by Mac, \n if test on windows need to run\n*Broker, \n*car_park_display.py")
                 subprocess.run(['cmd', '/c', f'python {self.current_directory}\\s20111176\\car_park_display.py'])
             elif self.os_name == "Darwin":
                 subprocess.run(['osascript', '-e', f'tell application "Terminal" to do script "cd {self.current_directory}; python3 s20111176/car_park_display.py;"'])
